@@ -6,12 +6,18 @@ import Formulario from './Formulario';
 import GraficoReporteEnfermedades from './GraficoReporteEnfermedades';
 import GraficoBezier from './GraficoBezier';
 import { collection, getDocs, query } from 'firebase/firestore';
+import GraficoProgreso from './GraficoProgreso';
 
 //Importación de conexión a firebase
 import db from '../../db/firebaseconfig';
 
 
 export default function Graficos() {
+
+    const [dataProgreso, setDataProgreso] = useState({
+        labels: [''],
+        data: [0]
+      });
 
   const [bandera, setBandera] = useState(false); // Variable bandera
   const [dataSalarios, setDataSalarios] = useState({
@@ -116,6 +122,15 @@ export default function Graficos() {
           }
         ];
 
+        totalPersonas = masculino + femenino;
+
+        const progresos = [masculino/totalPersonas, femenino/totalPersonas]
+
+        setDataProgreso({
+          labels: ['Hombres', 'Mujeres'],
+          data: progresos
+        });
+
         setDataGeneros(totalData);
         console.log(totalData);
       } catch (error) {
@@ -134,6 +149,10 @@ export default function Graficos() {
         <GraficoBezier dataSalarios={dataSalarios}/>
         <GraficoGeneros dataGeneros={dataGeneros}/>
         <GraficoReporteEnfermedades dataReporteEnfermedades={dataReporteEnfermedades}/>
+        <GraficoProgreso 
+          dataProgreso={dataProgreso}
+          colors={['rgba(131, 167, 234, 0.5)', 'rgba(255, 105, 180, 0.5)']}   
+        />
       </ScrollView>
 
     </View>
