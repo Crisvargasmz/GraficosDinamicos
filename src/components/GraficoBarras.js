@@ -1,10 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text } from 'react-native'; // Asegúrate de importar Text
+import {  View, Button, Alert, StyleSheet, Dimensions} from 'react-native';
+import {BarChart} from "react-native-chart-kit";
+import { jsPDF } from 'jspdf';
+import * as FileSystem from 'expo-file-system'; // Manejo de archivos
+import * as Sharing from 'expo-sharing'; // Para compartir archivos
 import { CartesianChart, Bar } from "victory-native";
 import { LinearGradient, vec, useFont } from "@shopify/react-native-skia";
 
 
 export default function GraficoBarras({data}) {
+
+  const generarPDF = async () => {
+    try {
+      // Crear una instancia de jsPDF
+      const doc = new jsPDF();
+
+      // Agregar título al PDF
+      doc.text("Reporte de Salarios Barra", 10, 10);
+
+      // Agregar los datos al PDF
+      data.forEach((label, index) => {
+        doc.text(`${label.nombre}: C$${label.salario}`, 10, 20 + index * 10); // Formato de los datos
+      });
+
+
+      // Generar el PDF como base64
+      const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+      // Definir la ruta temporal para el archivo PDF en el sistema de archivos del dispositivo
+      const fileUri = `${FileSystem.documentDirectory}reporte_salarios_Barra.pdf`;
+
+      // Guardar el archivo PDF
+      await FileSystem.writeAsStringAsync(fileUri, pdfBase64, {
+        encoding: FileSystem.EncodingType.Base64
+      });
+
+      // Compartir el archivo PDF
+      await Sharing.shareAsync(fileUri);
+      
+    } catch (error) {
+      console.error("Error al generar o compartir el PDF: ", error);
+      Alert.alert('Error', 'No se pudo generar o compartir el PDF.');
+    }
+  };
 
   const font = useFont(require("../../fonts/Roboto-Regular.ttf"));
 
@@ -50,6 +88,8 @@ export default function GraficoBarras({data}) {
       ) : (
         <View><Text>No hay datos para mostrar</Text></View> // Mensaje alternativo si no hay datos
       )}
+            {/* Botón para generar y compartir PDF */}
+	<Button title="Generar y Compartir PDF" onPress={generarPDF} />
     </View>
   );
 }

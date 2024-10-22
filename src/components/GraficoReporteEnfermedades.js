@@ -1,8 +1,46 @@
 
-import { StyleSheet, View, Dimensions, ScrollView, Alert } from 'react-native';
+import {  View, Button, Alert, StyleSheet, Dimensions,ScrollView} from 'react-native';
+import {BarChart} from "react-native-chart-kit";
+import { jsPDF } from 'jspdf';
+import * as FileSystem from 'expo-file-system'; // Manejo de archivos
+import * as Sharing from 'expo-sharing'; // Para compartir archivos
 import { ContributionGraph } from "react-native-chart-kit";
 
 export default function GraficoReporteEnfermedades({ dataReporteEnfermedades }) {
+  const generarPDF = async () => {
+    try {
+      // Crear una instancia de jsPDF
+      const doc = new jsPDF();
+
+      // Agregar título al PDF
+      doc.text("Reporte de Enfermedades", 10, 10);
+
+      // Agregar los datos al PDF
+      dataReporteEnfermedades.forEach((Date, index) => {
+        /* const salario = dataReporteEnfermedades.datasets[0].data[index]; */
+        doc.text(`${Date.date}: ${Date.count}`, 10, 20 + index * 10); // Formato de los datos
+      });
+
+
+      // Generar el PDF como base64
+      const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+      // Definir la ruta temporal para el archivo PDF en el sistema de archivos del dispositivo
+      const fileUri = `${FileSystem.documentDirectory}reporte_Enfermedades.pdf`;
+
+      // Guardar el archivo PDF
+      await FileSystem.writeAsStringAsync(fileUri, pdfBase64, {
+        encoding: FileSystem.EncodingType.Base64
+      });
+
+      // Compartir el archivo PDF
+      await Sharing.shareAsync(fileUri);
+      
+    } catch (error) {
+      console.error("Error al generar o compartir el PDF: ", error);
+      Alert.alert('Error', 'No se pudo generar o compartir el PDF.');
+    }
+  };
 
 
   const screenWidth = Dimensions.get("window").width;
@@ -55,7 +93,8 @@ export default function GraficoReporteEnfermedades({ dataReporteEnfermedades }) 
         />
 
       </ScrollView>
-
+            	{/* Botón para generar y compartir PDF */}
+              <Button title="Generar y Compartir PDF" onPress={generarPDF} />
     </View>
   );
 }

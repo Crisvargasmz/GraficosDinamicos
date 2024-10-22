@@ -1,9 +1,47 @@
-import { StyleSheet, View, Dimensions } from 'react-native';
+import {  View, Button, Alert, StyleSheet, Dimensions} from 'react-native';
 import {BarChart} from "react-native-chart-kit";
+import { jsPDF } from 'jspdf';
+import * as FileSystem from 'expo-file-system'; // Manejo de archivos
+import * as Sharing from 'expo-sharing'; // Para compartir archivos
 
 export default function GraficoSalarios({dataSalarios}) {
 
   let screenWidth = Dimensions.get("window").width
+
+  const generarPDF = async () => {
+    try {
+      // Crear una instancia de jsPDF
+      const doc = new jsPDF();
+
+      // Agregar título al PDF
+      doc.text("Reporte de Salarios", 10, 10);
+
+      // Agregar los datos al PDF
+      dataSalarios.labels.forEach((label, index) => {
+        const salario = dataSalarios.datasets[0].data[index];
+        doc.text(`${label}: C$${salario}`, 10, 20 + index * 10); // Formato de los datos
+      });
+
+
+      // Generar el PDF como base64
+      const pdfBase64 = doc.output('datauristring').split(',')[1];
+
+      // Definir la ruta temporal para el archivo PDF en el sistema de archivos del dispositivo
+      const fileUri = `${FileSystem.documentDirectory}reporte_salarios.pdf`;
+
+      // Guardar el archivo PDF
+      await FileSystem.writeAsStringAsync(fileUri, pdfBase64, {
+        encoding: FileSystem.EncodingType.Base64
+      });
+
+      // Compartir el archivo PDF
+      await Sharing.shareAsync(fileUri);
+      
+    } catch (error) {
+      console.error("Error al generar o compartir el PDF: ", error);
+      Alert.alert('Error', 'No se pudo generar o compartir el PDF.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -28,9 +66,14 @@ export default function GraficoSalarios({dataSalarios}) {
         withHorizontalLabels={true}
         showValuesOnTopOfBars={true}
       />
+      
+	{/* Botón para generar y compartir PDF */}
+	<Button title="Generar y Compartir PDF" onPress={generarPDF} />
     </View>
 
   );
+
+
 }
 
 const styles = StyleSheet.create({
