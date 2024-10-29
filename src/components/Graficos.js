@@ -145,10 +145,10 @@ export default function Graficos() {
     <View style={styles.container} >
       <ScrollView contentContainerStyle={styles.scrollView}>
         {/* <Formulario setBandera={setBandera}/> */}
-        <GraficoSalarios dataSalarios={dataSalarios}/>
-        <GraficoBezier dataSalarios={dataSalarios}/>
-        <GraficoGeneros dataGeneros={dataGeneros}/>
-        <GraficoReporteEnfermedades dataReporteEnfermedades={dataReporteEnfermedades}/>
+        <GraficoSalarios dataSalarios={dataSalarios} styles={styles.graphContainer}/>
+        <GraficoBezier dataSalarios={dataSalarios} styles={styles.graphContainer}/>
+        <GraficoGeneros dataGeneros={dataGeneros} styles={styles.graphContainer}/>
+        <GraficoReporteEnfermedades dataReporteEnfermedades={dataReporteEnfermedades} styles={styles.graphContainer}/>
         <GraficoProgreso 
           dataProgreso={dataProgreso}
           colors={['rgba(131, 167, 234, 0.5)', 'rgba(255, 105, 180, 0.5)']}   
@@ -161,15 +161,16 @@ export default function Graficos() {
 }
 
 const styles = StyleSheet.create({
+  graphContainer: {
+    marginTop: 10,
+    padding: 10,
+    width: '200%'
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
   scrollView: {
-    padding: 10,
-  },
-  graphContainer: {
-    marginTop: 10,
     padding: 10,
   },
 }); 
