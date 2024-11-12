@@ -80,6 +80,7 @@ export default function GraficoGeneros({ dataGeneros }) {
           backgroundColor={"transparent"}
           style={{
             borderRadius: 10
+            
           }}
         />
       </View>
